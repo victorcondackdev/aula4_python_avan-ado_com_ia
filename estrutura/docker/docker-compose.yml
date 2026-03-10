@@ -1,9 +1,10 @@
+name: aula4_drf
+
 services:
   api:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: aula4_api
     env_file:
       - .env
     ports:
@@ -13,15 +14,17 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-127.0.0.1,localhost}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app123}@db:5432/${POSTGRES_DB:-appdb}
+      DB_HOST: ${DB_HOST:-db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app123}@${DB_HOST:-db}:5432/${POSTGRES_DB:-appdb}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - aula4_net
 
   db:
     image: postgres:16-alpine
-    container_name: aula4_db
     env_file:
       - .env
     ports:
@@ -33,8 +36,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    hostname: db
     networks:
-      default:
+      aula4_net:
         aliases:
           - db
     healthcheck:
@@ -46,3 +50,8 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  aula4_net:
+    name: aula4_drf_net
+    driver: bridge
