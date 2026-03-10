@@ -33,6 +33,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      default:
+        aliases:
+          - db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-appdb}"]
       interval: 5s

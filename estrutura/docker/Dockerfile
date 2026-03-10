@@ -51,5 +51,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
     CMD python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()" || exit 1
 
-# Aplica migracoes e sobe o servidor WSGI da aplicacao DRF.
-CMD ["sh", "-c", "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60"]
+# Aplica migracoes com retry e sobe o servidor WSGI da aplicacao DRF.
+CMD ["sh", "docker/entrypoint.sh"]
