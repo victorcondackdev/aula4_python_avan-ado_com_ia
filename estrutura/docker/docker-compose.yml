@@ -1,0 +1,44 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: aula4_api
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      # Minimo para app + conexao com banco.
+      APP_ENV: ${APP_ENV:-dev}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-127.0.0.1,localhost}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app123}@db:5432/${POSTGRES_DB:-appdb}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: aula4_db
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      # Minimo para inicializacao do Postgres.
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-appdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
