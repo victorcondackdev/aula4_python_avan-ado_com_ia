@@ -43,6 +43,8 @@ RUN groupadd --system ${APP_USER} \
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=${APP_USER}:${APP_USER} . /app/
+RUN mkdir -p /app/staticfiles \
+    && chown -R ${APP_USER}:${APP_USER} /app
 
 USER ${APP_USER}
 
